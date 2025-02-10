@@ -13,3 +13,9 @@ rust-version.workspace = true
 
 [lints]
 workspace = true
+
+[build-dependencies]
+byte-unit = "4.0"
+colored = "2.0"
+num_cpus = "1.15"
+sysinfo = "0.29"
