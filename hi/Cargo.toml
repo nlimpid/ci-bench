@@ -1,0 +1,23 @@
+[package]
+name = "hi"
+version = "0.1.0"
+
+edition.workspace = true
+homepage.workspace = true
+license.workspace = true
+readme.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+axum = { version = "0.8.1", features = ["macros"] }
+tokio = { version = "1.41.1", features = ["full"] }
+
+[lints]
+workspace = true
+
+[build-dependencies]
+byte-unit = "4.0"
+colored = "2.0"
+num_cpus = "1.15"
+sysinfo = "0.29"
