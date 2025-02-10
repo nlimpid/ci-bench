@@ -24,26 +24,46 @@ fn main() {
     // 添加性能基准测试
     run_benchmarks();
 
-    // Force the output to be printed during build
-    println!("cargo:warning=Build script execution completed");
-    println!("cargo:warning=Build script is running!");
+    // 在最后添加表格总结
+    print_summary_table(&sys);
 }
 
-fn format_box(title: &str, content: Vec<String>) -> String {
-    let width = 60;
-    let horizontal_line = "━".repeat(width);
-    let mut result = String::new();
+fn print_summary_table(sys: &System) {
+    let cpu_score = bench_cpu();
+    let (read_speed, write_speed) = bench_memory();
+    let total_memory = Byte::from_bytes(sys.total_memory() as u128);
+    let used_memory = Byte::from_bytes((sys.total_memory() - sys.available_memory()) as u128);
+    let memory_usage = (used_memory.get_bytes() as f64 / total_memory.get_bytes() as f64) * 100.0;
+    let cpu_usage: f32 =
+        sys.cpus().iter().map(|cpu| cpu.cpu_usage()).sum::<f32>() / sys.cpus().len() as f32;
 
-    result.push_str(&format!("┏{}┓\n", horizontal_line));
-    result.push_str(&format!("┃{:^width$}┃\n", title, width = width));
-    result.push_str(&format!("┣{}┫\n", horizontal_line));
-
-    for line in content {
-        result.push_str(&format!("┃ {:<width$}┃\n", line, width = width - 1));
-    }
-
-    result.push_str(&format!("┗{}┛\n", horizontal_line));
-    result
+    println!("cargo:warning=┌──────────────────────────────────────────────────────────────┐");
+    println!("cargo:warning=│                      系统状态速览                           │");
+    println!("cargo:warning=├────────────────┬─────────────────────────────────────────────┤");
+    println!("cargo:warning=│ CPU使用率      │ {:<43.1}% │", cpu_usage);
+    println!(
+        "cargo:warning=│ CPU性能得分    │ {:<43.1} GFLOPS │",
+        cpu_score
+    );
+    println!(
+        "cargo:warning=│ CPU评级        │ {:<43} │",
+        rate_cpu_performance(cpu_score)
+    );
+    println!("cargo:warning=├────────────────┼─────────────────────────────────────────────┤");
+    println!("cargo:warning=│ 内存使用率     │ {:<43.1}% │", memory_usage);
+    println!(
+        "cargo:warning=│ 内存读取速度   │ {:<43.1} GB/s │",
+        read_speed
+    );
+    println!(
+        "cargo:warning=│ 内存写入速度   │ {:<43.1} GB/s │",
+        write_speed
+    );
+    println!(
+        "cargo:warning=│ 内存评级       │ {:<43} │",
+        rate_memory_performance(read_speed)
+    );
+    println!("cargo:warning=└────────────────┴─────────────────────────────────────────────┘");
 }
 
 fn print_title(title: &str) {
@@ -129,6 +149,23 @@ fn print_disk_info(sys: &System) {
     for line in formatted.lines() {
         println!("cargo:warning={}", line);
     }
+}
+
+fn format_box(title: &str, content: Vec<String>) -> String {
+    let width = 60;
+    let horizontal_line = "━".repeat(width);
+    let mut result = String::new();
+
+    result.push_str(&format!("┏{}┓\n", horizontal_line));
+    result.push_str(&format!("┃{:^width$}┃\n", title, width = width));
+    result.push_str(&format!("┣{}┫\n", horizontal_line));
+
+    for line in content {
+        result.push_str(&format!("┃ {:<width$}┃\n", line, width = width - 1));
+    }
+
+    result.push_str(&format!("┗{}┛\n", horizontal_line));
+    result
 }
 
 fn run_benchmarks() {
