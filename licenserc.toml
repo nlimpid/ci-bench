@@ -12,10 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-headerPath = "Apache-2.0.txt"
+[header]
+builtin = "Apache-2.0"
 
+[files]
+excludes = [
+  # rustfmt removes the separator that HawkEye writes after this header-only placeholder.
+  "template/src/lib.rs",
+]
 includes = ['**/*.proto', '**/*.rs', '**/*.yml', '**/*.yaml', '**/*.toml']
 
-[properties]
-copyrightOwner = "FastLabs Developers"
-inceptionYear = 2024
+[props]
+copyright_owner = "FastLabs Developers"
+inception_year = 2024
